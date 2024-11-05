@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de QR Code com JavaScript</title>
+    <!-- Biblioteca jsQR -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.js"></script>
+</head>
+<body>
+    <h1>Leitor de QR Code com JavaScript</h1>
+    <p>Permita o acesso à câmera para escanear o QR Code.</p>
+    <video id="video" style="width: 100%; max-width: 400px;" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <p id="output" style="font-weight: bold; font-size: 1.2em;"></p>
+
+    <script>
+        async function startCamera() {
+            const video = document.getElementById("video");
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream;
+                await video.play();
+                scanQRCode(video);
+            } catch (err) {
+                document.getElementById("output").textContent = "Erro ao acessar a câmera: " + err;
+                console.error("Erro ao acessar a câmera:", err);
+            }
+        }
+
+        function scanQRCode(video) {
+            const canvas = document.getElementById("canvas");
+            const context = canvas.getContext("2d");
+            const output = document.getElementById("output");
+
+            function tick() {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                    if (code) {
+                        output.textContent = "Código QR detectado: " + code.data;
+                        console.log("Código QR detectado:", code.data);
+                        return;  // Para o loop após detectar o QR Code
+                    }
+                }
+                requestAnimationFrame(tick);
+            }
+            tick();
+        }
+
+        // Iniciar a câmera e o processo de escaneamento
+        startCamera();
+    </script>
+</body>
+</html>
