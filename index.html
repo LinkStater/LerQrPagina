@@ -76,6 +76,14 @@
                     if (code) {
                         output.textContent = "Código QR detectado: " + code.data;
                         console.log("Código QR detectado:", code.data);
+
+fetch("https://e01cf36f-2f3f-444b-bca8-3a1eadfb8c1a-00-11qj28uhseaw1.picard.replit.dev/teste/" + code.data)
+.then(response => response.text())
+.then(gabriel => {
+    alert(gabriel)
+})
+
+
                         return;  // Para o loop após detectar o QR Code
                     }
                 }
